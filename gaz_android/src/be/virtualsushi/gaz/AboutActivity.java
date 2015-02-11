@@ -1,0 +1,81 @@
+package be.virtualsushi.gaz;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import android.graphics.Typeface;
+import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.util.Log;
+import android.view.MenuItem;
+import android.widget.TextView;
+import be.virtualsushi.gaz.elite.EliteTypefaceProvider;
+
+public class AboutActivity extends ActionBarActivity implements EliteTypefaceProvider {
+
+	private TextView mAbout;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_about);
+
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setDisplayShowHomeEnabled(false);
+		actionBar.setDisplayShowTitleEnabled(true);
+		actionBar.setDisplayUseLogoEnabled(false);
+
+		mAbout = (TextView) findViewById(R.id.about);
+
+		BufferedReader reader = null;
+		InputStreamReader inputStreamReader = null;
+		try {
+			StringBuilder htmlBuilder = new StringBuilder();
+			inputStreamReader = new InputStreamReader(getAssets().open("about.html"), "UTF-8");
+			reader = new BufferedReader(inputStreamReader);
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				htmlBuilder.append(line);
+			}
+			mAbout.setMovementMethod(LinkMovementMethod.getInstance());
+			mAbout.setTypeface(getEliteTypeface());
+			mAbout.setText(Html.fromHtml(htmlBuilder.toString()));
+		} catch (IOException e) {
+			Log.e(getClass().getName(), "Unable to read about.html", e);
+		} finally {
+			try {
+				if (inputStreamReader != null) {
+					inputStreamReader.close();
+				}
+				if (reader != null) {
+					reader.close();
+				}
+			} catch (IOException e) {
+			}
+		}
+
+	}
+
+	private Tick5Application getTick5Application() {
+		return (Tick5Application) getApplication();
+	}
+
+	@Override
+	public Typeface getEliteTypeface() {
+		return getTick5Application().getEliteTypeface();
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (android.R.id.home == item.getItemId()) {
+			finish();
+		}
+		return true;
+	}
+
+}
